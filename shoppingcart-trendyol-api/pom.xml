@@ -10,6 +10,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>shoppingcart-trendyol-api</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.trendyol</groupId>
+            <artifactId>shoppingcart-trendyol-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.trendyol</groupId>
+            <artifactId>shoppingcart-trendyol-repository</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 
 </project>

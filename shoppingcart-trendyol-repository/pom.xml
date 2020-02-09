@@ -9,22 +9,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>shoppingcart-trendyol-core</artifactId>
-
+    <artifactId>shoppingcart-trendyol-repository</artifactId>
     <dependencies>
-
         <dependency>
             <groupId>com.trendyol</groupId>
-            <artifactId>shoppingcart-trendyol-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.trendyol</groupId>
-            <artifactId>shoppingcart-trendyol-repository</artifactId>
+            <artifactId>shoppingcart-trendyol-model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
 
 </project>

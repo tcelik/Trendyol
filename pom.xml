@@ -8,6 +8,7 @@
 		<module>shoppingcart-trendyol-api</module>
 		<module>shoppingcart-trendyol-core</module>
         <module>shoppingcart-trendyol-main</module>
+        <module>shoppingcart-trendyol-repository</module>
     </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -42,6 +43,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.12</version>
+			<scope>provided</scope>
+			</dependency>
 	</dependencies>
 
 	<build>

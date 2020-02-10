@@ -5,11 +5,13 @@ import com.trendyol.shoppingcart.model.*;
 import com.trendyol.shoppingcart.repository.ShoppingCartRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import static com.trendyol.shoppingcart.model.Discount.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link ShoppingCartServiceImpl}.
@@ -18,15 +20,14 @@ import static org.mockito.Mockito.mock;
  */
 @Slf4j
 public class ShoppingCartServiceImplTests {
-    DeliveryCostCalculatorService calculator;
-    ShoppingCartServiceImpl cart;
+    private DeliveryCostCalculatorService calculator;
+    private ShoppingCartServiceImpl cart;
 
     @BeforeEach
     public void setup() {
         calculator = mock(DeliveryCostCalculatorService.class);
-        cart = new ShoppingCartServiceImpl();
+        cart = new ShoppingCartServiceImpl(calculator);
     }
-
 
     @Test
     public void test_think_database_just_a_map_instance() {
@@ -82,125 +83,102 @@ public class ShoppingCartServiceImplTests {
 
     @Test
     public void test_adding_different_product() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // empty products
+        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(calculator); // empty products
         Product apple = new Product("Apple", 100.0, new Category("food"));
         Product almonds = new Product("Almonds", 150.0, new Category("food"));
 
         shoppingCartService.addItem(apple, 10);
         shoppingCartService.addItem(almonds, 2);
 
-        assertEquals(shoppingCartService.getTotalProduct(), 2);
+        assertEquals(shoppingCartService.getNumberOfProducts(), 2);
         assertEquals(shoppingCartService.getQuantityOfProduct(apple), 10);
         assertEquals(shoppingCartService.getQuantityOfProduct(almonds), 2);
     }
 
     @Test
     public void test_adding_null_product() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // empty products
+        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(calculator); // empty products
         Product apple = null;
 
         shoppingCartService.addItem(apple, 10);
 
-        assertEquals(shoppingCartService.getTotalProduct(), 0);
+        assertEquals(shoppingCartService.getNumberOfProducts(), 0);
     }
 
     @Test
     public void test_adding_product_with_zero_quantity__must_not_be_added() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // empty products
+        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(calculator); // empty products
         Product apple = new Product("Apple", 100.0, new Category("food"));
 
         shoppingCartService.addItem(apple, 0);
 
-        assertEquals(shoppingCartService.getTotalProduct(), 0);
+        assertEquals(shoppingCartService.getNumberOfProducts(), 0);
     }
 
     @Test
     public void test_adding_product_with_negative_quantity__must_not_be_added() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // empty products
         Product apple = new Product("Apple", 100.0, new Category("food"));
 
-        shoppingCartService.addItem(apple, -1);
+        cart.addItem(apple, -1);
 
-        assertEquals(shoppingCartService.getTotalProduct(), 0);
+        assertEquals(cart.getNumberOfProducts(), 0);
     }
 
     @Test
     public void test_getTotalPriceOfAllProducts_there_is_no_discount() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // empty products
         Product apple = new Product("Apple", 100.0, new Category("food"));
         Product almonds = new Product("Almonds", 150.0, new Category("food"));
 
-        shoppingCartService.addItem(apple, 3);
-        shoppingCartService.addItem(almonds, 3);
+        cart.addItem(apple, 3);
+        cart.addItem(almonds, 3);
 
         Double expectedPrice = (100.0 * 3) + (150.0 * 3);
-        assertEquals(expectedPrice, shoppingCartService.getTotalPriceOfProducts());
+        assertEquals(expectedPrice, cart.getTotalPriceOfProducts());
     }
 
 
     @Test
     public void test_apply_campaign_same_category_discount_to_cart() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // init empty products
         ShoppingCartServiceImpl shoppingCartServiceMock = mock(ShoppingCartServiceImpl.class);
         Product apple = new Product("Apple", 100.0, new Category("food"));
         Product almonds = new Product("Almonds", 150.0, new Category("food"));
         Product orange = new Product("Oranges", 50.0, new Category("food"));
 
-        shoppingCartService.addItem(apple, 3);
-        shoppingCartService.addItem(almonds, 3);
-        shoppingCartService.addItem(orange, 1);
+        cart.addItem(apple, 3);
+        cart.addItem(almonds, 3);
+        cart.addItem(orange, 1);
 
         Campaign campaign1 = new Campaign(new Category("food"), 20.0, 3, DiscountType.RATE);
-        //Campaign campaign2 = new Campaign(new Category("food"), 50.0, 5, DiscountType.RATE);
-        // Campaign campaign3 = new Campaign(new Category("food"), 5, 10, DiscountType.AMOUNT);
 
-        // shoppingCartService.addingCampaignsToCart(Arrays.asList(campaign1, campaign2, campaign3));
-        shoppingCartService.applyDiscounts(Arrays.asList(campaign1));
-        Double totalPriceOfProductsWithoutDiscount = shoppingCartService.getTotalPriceOfProducts();
+        cart.applyDiscounts(Arrays.asList(campaign1));
+        Double totalPriceOfProductsWithoutDiscount = cart.getTotalPriceOfProducts();
         assertEquals(totalPriceOfProductsWithoutDiscount, 800);
 
 
         Double expectedDiscountPrice = 160.0;
-        assertEquals(expectedDiscountPrice, shoppingCartService.getCampaignDiscount());
-
-        // Double expectedDiscountPrice =
-        // Double campaignDiscount = shoppingCartService.getCampaignDiscount();
-
-        //Double expectedPrice = (100.0 * 3) + (150.0 * 3);
-        //assertEquals(expectedPrice, shoppingCartService.getTotalPriceOfProducts());
+        assertEquals(expectedDiscountPrice, cart.getCampaignDiscount());
     }
 
     @Test
     public void applyDiscount_2DifferentCampaignButSameCategory() {
-        ShoppingCartServiceImpl shoppingCartService = new ShoppingCartServiceImpl(); // init empty products
         ShoppingCartServiceImpl shoppingCartServiceMock = mock(ShoppingCartServiceImpl.class);
         Product apple = new Product("Apple", 100.0, new Category("food"));
         Product almonds = new Product("Almonds", 150.0, new Category("food"));
         Product orange = new Product("Oranges", 50.0, new Category("food"));
 
-        shoppingCartService.addItem(apple, 3);
-        shoppingCartService.addItem(almonds, 3);
-        shoppingCartService.addItem(orange, 1);
+        cart.addItem(apple, 3);
+        cart.addItem(almonds, 3);
+        cart.addItem(orange, 1);
 
         Campaign campaign1 = new Campaign(new Category("food"), 20.0, 3, DiscountType.RATE);
         Campaign campaign2 = new Campaign(new Category("food"), .0, 5, DiscountType.RATE);
-        //Campaign campaign2 = new Campaign(new Category("food"), 50.0, 5, DiscountType.RATE);
-        // Campaign campaign3 = new Campaign(new Category("food"), 5, 10, DiscountType.AMOUNT);
 
-        // shoppingCartService.addingCampaignsToCart(Arrays.asList(campaign1, campaign2, campaign3));
-        shoppingCartService.applyDiscounts(Arrays.asList(campaign1));
-        Double totalPriceOfProductsWithoutDiscount = shoppingCartService.getTotalPriceOfProducts();
+        cart.applyDiscounts(Arrays.asList(campaign1));
+        Double totalPriceOfProductsWithoutDiscount = cart.getTotalPriceOfProducts();
         assertEquals(totalPriceOfProductsWithoutDiscount, 800);
 
-
         Double expectedDiscountPrice = 160.0;
-        assertEquals(expectedDiscountPrice, shoppingCartService.getCampaignDiscount());
-
-        // Double expectedDiscountPrice =
-        // Double campaignDiscount = shoppingCartService.getCampaignDiscount();
-
-        //Double expectedPrice = (100.0 * 3) + (150.0 * 3);
-        //assertEquals(expectedPrice, shoppingCartService.getTotalPriceOfProducts());
+        assertEquals(expectedDiscountPrice, cart.getCampaignDiscount());
     }
 
     // GetCampaignDiscount test starting
@@ -703,5 +681,73 @@ public class ShoppingCartServiceImplTests {
         double expected = totalAmountAfterCampaign - (totalAmountAfterCampaign * 0.1);
         assertEquals(expected, cart.getTotalAmountAfterDiscounts());
 
+    }
+
+    @Test
+    public void getDistinctCategoryValue_TwoDifferentCategoriesInCart_ReturnTwo()
+    {
+        Category categoryFruit = new Category("Fruit");
+        Category categoryFurniture = new Category("Furniture");
+
+        Product p1 = new Product("Apple", 10.0, categoryFruit);
+        Product p2 = new Product("Table", 100.0, categoryFurniture);
+
+        cart.addItem(p1, 3);
+        cart.addItem(p2, 2);
+
+        assertEquals(2, cart.getNumberOfDeliveries());
+    }
+
+    @Test
+    public void getDistinctCategoryValue_SameCategoryInCart_ReturnOne()
+    {
+        Category categoryFruit = new Category("Fruit");
+
+        Product p1 = new Product("Apple", 10.0, categoryFruit);
+        Product p2 = new Product("Orange", 100.0, categoryFruit);
+
+        cart.addItem(p1, 3);
+        cart.addItem(p2, 2);
+
+        assertEquals(1, cart.getNumberOfDeliveries());
+    }
+
+    @Test
+    public void getDistinctCategoryValue_OneCategoryOneProductInCart_ReturnOne()
+    {
+        Category categoryFruit = new Category("Fruit");
+        Product p1 = new Product("Apple", 10.0, categoryFruit);
+
+        cart.addItem(p1, 3);
+
+        assertEquals(1, cart.getNumberOfDeliveries());
+    }
+
+    @Test
+    public void getDistinctCategoryValue_EmptyCart_ReturnZero()
+    {
+        assertEquals(0, cart.getNumberOfDeliveries());
+    }
+
+    @Test
+    public void GetDeliveryCost_TestMock_ReturnsMockValue()
+    {
+        when(calculator.calculateFor(cart)).thenReturn(5.0);
+
+        assertEquals(5.0, cart.getDeliveryCost());
+    }
+
+    @Test
+    public void test_getDeliveryCostWithOneProductWithDeliveryCostCalculator_ReturnsAsExpected()
+    {
+        Product p1 = new Product("Apple", 10.0, new Category("fruit"));
+        DeliveryCostCalculatorServiceImpl calculator =
+                new DeliveryCostCalculatorServiceImpl(2.0, 1.0, 2.99);
+
+        cart.setDeliveryCostCalculator(calculator);
+        cart.addItem(p1 ,10 );
+
+        double expected = 5.99;
+        assertEquals(expected, cart.getDeliveryCost());
     }
 }

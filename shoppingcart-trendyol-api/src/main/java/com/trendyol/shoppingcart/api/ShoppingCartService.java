@@ -20,7 +20,7 @@ public interface ShoppingCartService {
     /**
      * How many products in cart?
      */
-    Integer getTotalProduct();
+    Integer getNumberOfProducts();
 
     /**
      * Quantity info ( amount ) of product
@@ -52,8 +52,6 @@ public interface ShoppingCartService {
      */
     Double getCampaignDiscount();
 
-    Double getDeliveryCost();
-
     /**
      * Apply coupon to cart if applicable.
      * Throws exception if it is not applicable.
@@ -75,4 +73,12 @@ public interface ShoppingCartService {
      *
      */
     Double getTotalAmountAfterDiscounts();
+
+    /**
+     * Getting delivery cost calculation
+     */
+    Double getDeliveryCost();
+
+    Integer getNumberOfDeliveries();
+
 }

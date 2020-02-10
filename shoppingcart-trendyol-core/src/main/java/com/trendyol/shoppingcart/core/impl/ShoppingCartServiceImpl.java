@@ -1,5 +1,6 @@
 package com.trendyol.shoppingcart.core.impl;
 
+import com.trendyol.shoppingcart.api.DeliveryCostCalculatorService;
 import com.trendyol.shoppingcart.api.ShoppingCartService;
 import com.trendyol.shoppingcart.model.Campaign;
 import com.trendyol.shoppingcart.model.Coupon;
@@ -13,6 +14,11 @@ import java.util.List;
 @Slf4j
 public class ShoppingCartServiceImpl implements ShoppingCartService {
     private ShoppingCartRepository shoppingCartRepository = new ShoppingCartRepository();
+    private DeliveryCostCalculatorService deliveryCostCalculator;
+
+    public ShoppingCartServiceImpl(DeliveryCostCalculatorService deliveryCostCalculator) {
+        this.deliveryCostCalculator = deliveryCostCalculator;
+    }
 
     @Override
     public void addItem(Product product, int quantity) {
@@ -28,7 +34,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public Integer getTotalProduct() {
+    public Integer getNumberOfProducts() {
         return shoppingCartRepository.get();
     }
 
@@ -65,7 +71,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public Double getDeliveryCost() {
-        return null;
+        if (deliveryCostCalculator == null) {
+            setTheDefaultDeliveryCostCalculator();
+            return deliveryCostCalculator.calculateFor(this);
+        }
+        return deliveryCostCalculator.calculateFor(this);
+    }
+
+    private void setTheDefaultDeliveryCostCalculator() {
+        this.deliveryCostCalculator = new DefaultDeliveryCostCalculatorServiceImpl(1.0, 1.0, 2.99);
     }
 
     @Override
@@ -84,5 +98,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         totalAmount -= shoppingCartRepository.getCampaignDiscountPrice(); // first campaing
         totalAmount -= shoppingCartRepository.getCouponDiscount(totalAmount);
         return totalAmount;
+    }
+
+    public Integer getNumberOfDeliveries() {
+        return shoppingCartRepository.getDistinctCategoryValue();
+    }
+
+    public void setDeliveryCostCalculator(DeliveryCostCalculatorService deliveryCostCalculator) {
+        this.deliveryCostCalculator = deliveryCostCalculator;
     }
 }

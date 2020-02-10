@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ShoppingCartRepository {
@@ -182,5 +184,13 @@ public class ShoppingCartRepository {
 
     public void setCoupon(Coupon coupon) {
         this.coupon = coupon;
+    }
+
+    public Integer getDistinctCategoryValue() {
+        return countDifferentCategoriesInCart();
+    }
+
+    private Integer countDifferentCategoriesInCart() {
+        return products.keySet().stream().collect(Collectors.groupingBy(p -> p.getCategory().getTitle())).size();
     }
 }

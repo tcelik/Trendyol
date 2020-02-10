@@ -1,17 +1,17 @@
 package com.trendyol.shoppingcart.model;
 
 public abstract class Discount {
+    private Integer minimumAmount;
     private Double discountAmount;
     private DiscountType discountType;
-    private Integer minimumAmount;
 
-    public Discount(int minimumAmount, double discountAmount, DiscountType discountType) {
+    public Discount(Integer minimumAmount, Double discountAmount, DiscountType discountType) {
+        this.minimumAmount = minimumAmount;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.minimumAmount = minimumAmount;
     }
 
-    public static enum DiscountType {
+    public enum DiscountType {
         RATE,
         AMOUNT
     }
@@ -39,4 +39,6 @@ public abstract class Discount {
     public void setMinimumAmount(Integer minimumAmount) {
         this.minimumAmount = minimumAmount;
     }
+
+
 }

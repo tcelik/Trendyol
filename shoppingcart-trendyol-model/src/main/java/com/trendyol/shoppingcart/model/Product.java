@@ -1,5 +1,8 @@
 package com.trendyol.shoppingcart.model;
 
+import lombok.ToString;
+
+@ToString
 public class Product {
     private String title;
     private Double price;

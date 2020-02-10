@@ -1,7 +1,10 @@
 package com.trendyol.shoppingcart.model;
 
+import lombok.ToString;
+
 import java.util.Optional;
 
+@ToString
 public class Category {
     private String title;
     private Optional<Category> parentCategory;

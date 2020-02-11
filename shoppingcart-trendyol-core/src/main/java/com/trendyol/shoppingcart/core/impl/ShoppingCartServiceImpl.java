@@ -3,6 +3,7 @@ package com.trendyol.shoppingcart.core.impl;
 import com.trendyol.shoppingcart.api.DeliveryCostCalculatorService;
 import com.trendyol.shoppingcart.api.ShoppingCartService;
 import com.trendyol.shoppingcart.model.Campaign;
+import com.trendyol.shoppingcart.model.Category;
 import com.trendyol.shoppingcart.model.Coupon;
 import com.trendyol.shoppingcart.model.Product;
 import com.trendyol.shoppingcart.repository.ShoppingCartRepository;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class ShoppingCartServiceImpl implements ShoppingCartService {
@@ -107,4 +109,5 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public void setDeliveryCostCalculator(DeliveryCostCalculatorService deliveryCostCalculator) {
         this.deliveryCostCalculator = deliveryCostCalculator;
     }
+
 }

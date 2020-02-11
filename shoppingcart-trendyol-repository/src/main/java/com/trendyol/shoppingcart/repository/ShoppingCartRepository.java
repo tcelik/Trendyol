@@ -24,12 +24,25 @@ public class ShoppingCartRepository {
         HashMap<Product, Integer> resultProducts = new HashMap<>();
 
         for (Product p : products.keySet()) {
-            if (p.getCategory().getTitle().equals(category.getTitle())) {
+            if (p.getCategory().getTitle().equals(category.getTitle()) || isSubCategory(category, p.getCategory())) {
                 resultProducts.put(p, products.get(p));
             }
         }
         return resultProducts;
     }
+
+    private Boolean isSubCategory(Category parent, Category sub)
+    {
+        Category temp = sub.getParentCategory().orElse(null);
+        while (temp != null) {
+            if (temp == parent) {
+                return true;
+            }
+            temp = temp.getParentCategory().orElse(null);
+        }
+        return false;
+    }
+
 
     private Integer getAllProductQuantityCountByCategory(Category category) {
         HashMap<Product, Integer> productsByCategory = getProductsByCategory(category);

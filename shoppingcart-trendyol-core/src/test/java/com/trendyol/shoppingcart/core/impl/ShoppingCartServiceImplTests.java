@@ -8,6 +8,8 @@ import org.junit.jupiter.api.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Optional;
+
 import static com.trendyol.shoppingcart.model.Discount.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -749,5 +751,34 @@ public class ShoppingCartServiceImplTests {
 
         double expected = 5.99;
         assertEquals(expected, cart.getDeliveryCost());
+    }
+
+    @Test
+    public void GetCampaignDiscount_CampaingAppliedByMainCategory_ReturnsDiscountAmount()
+    {
+        Category computer = new Category("Main-Category-Computer");
+        Category tablet = new Category("Sub-Category-Tablet", Optional.of(computer));
+
+        Product p1 = new Product("Samsung-Tablet", 1000.0, tablet);
+        cart.addItem(p1, 3);
+
+        // Campaign applied to main category.
+        Campaign campaign = new Campaign(computer, 250, 2, DiscountType.AMOUNT);
+        cart.applyDiscounts(campaign);
+        assertEquals(250, cart.getCampaignDiscount());
+    }
+
+    @Test
+    public void Above_Test_With_RATE()
+    {
+        Category computer = new Category("Main-Category-Computer");
+        Category tablet = new Category("Sub-Category-Tablet", Optional.of(computer));
+
+        Product p1 = new Product("Samsung-Tablet", 1000.0, tablet);
+        cart.addItem(p1, 1);
+
+        Campaign campaign = new Campaign(computer, 20, 1, DiscountType.RATE);
+        cart.applyDiscounts(campaign);
+        assertEquals(200, cart.getCampaignDiscount());
     }
 }

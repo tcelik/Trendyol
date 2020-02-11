@@ -131,8 +131,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             }
         }
 
-        builder.append("Results:\n");
         builder.append("---------------------------------------------------------------------------------------\n");
+        builder.append("Results:\n");
         builder.append(String.format("Total Amount: %.3f%n", getTotalPriceOfProducts()));
         builder.append(String.format("Total Amount After Discounts: %.3f%n", getTotalAmountAfterDiscounts()));
         builder.append(String.format("Your Delivery Cost: %.3f%n", getDeliveryCost()));

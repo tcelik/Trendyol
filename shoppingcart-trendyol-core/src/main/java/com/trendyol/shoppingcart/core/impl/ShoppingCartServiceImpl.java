@@ -110,16 +110,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         this.deliveryCostCalculator = deliveryCostCalculator;
     }
 
-    private Double getPriceByProduct(Product product)
-    {
-        Double result = null;
-        if (!shoppingCartRepository.getProducts().containsKey(product))
-        {
-            throw new IllegalArgumentException("Key not found");
-        }
-        return shoppingCartRepository.getProducts().get(product) * product.getPrice();
-    }
-
     public String print()
     {
         StringBuilder builder = new StringBuilder();

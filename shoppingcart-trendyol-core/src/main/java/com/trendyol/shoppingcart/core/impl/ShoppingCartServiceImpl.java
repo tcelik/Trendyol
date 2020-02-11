@@ -2,16 +2,16 @@ package com.trendyol.shoppingcart.core.impl;
 
 import com.trendyol.shoppingcart.api.DeliveryCostCalculatorService;
 import com.trendyol.shoppingcart.api.ShoppingCartService;
+import com.trendyol.shoppingcart.common.dto.ProductDto;
+import com.trendyol.shoppingcart.core.mapper.DtoMapper;
 import com.trendyol.shoppingcart.model.Campaign;
-import com.trendyol.shoppingcart.model.Category;
 import com.trendyol.shoppingcart.model.Coupon;
 import com.trendyol.shoppingcart.model.Product;
 import com.trendyol.shoppingcart.repository.ShoppingCartRepository;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ShoppingCartServiceImpl implements ShoppingCartService {
@@ -31,7 +31,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public Double getTotalPriceOfProducts() {
-        log.info("Getting initial value price of all products in cart");
+        // log.info("Getting initial value price of all products in cart");
         return shoppingCartRepository.getTotalPriceOfAllProducts();
     }
 
@@ -81,7 +81,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private void setTheDefaultDeliveryCostCalculator() {
-        this.deliveryCostCalculator = new DefaultDeliveryCostCalculatorServiceImpl(1.0, 1.0, 2.99);
+        this.deliveryCostCalculator = new FixedDeliveryCostCalculatorServiceImpl(1.0, 1.0);
     }
 
     @Override
@@ -95,9 +95,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public Double getTotalAmountAfterDiscounts() {
+    public Double getTotalAmountAfterDiscounts() { // campaign, coupons applied.
         Double totalAmount = getTotalPriceOfProducts();
-        totalAmount -= shoppingCartRepository.getCampaignDiscountPrice(); // first campaing
+        totalAmount -= shoppingCartRepository.getCampaignDiscountPrice(); // first campaign
         totalAmount -= shoppingCartRepository.getCouponDiscount(totalAmount);
         return totalAmount;
     }
@@ -109,5 +109,48 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public void setDeliveryCostCalculator(DeliveryCostCalculatorService deliveryCostCalculator) {
         this.deliveryCostCalculator = deliveryCostCalculator;
     }
+
+    private Double getPriceByProduct(Product product)
+    {
+        Double result = null;
+        if (!shoppingCartRepository.getProducts().containsKey(product))
+        {
+            throw new IllegalArgumentException("Key not found");
+        }
+        return shoppingCartRepository.getProducts().get(product) * product.getPrice();
+    }
+
+    public String print()
+    {
+        StringBuilder builder = new StringBuilder();
+        HashMap<Product, Integer> products = shoppingCartRepository.getProducts();
+        Map<String, List<Product>> productsGroupByTitle = products.keySet().stream().collect(Collectors.groupingBy(p -> p.getCategory().getTitle()));
+
+        builder.append(String.format("%15s %15s %15s %15s %15s%n", "Category Name", "Product Name", "Quantity", "Unit Price", "Total Price"));
+        builder.append("---------------------------------------------------------------------------------------\n");
+
+        /**
+         *  Info: This algorithm java8 version. In there, I prefering the hard-coded-way just readability concerns.
+         *
+         *  productsGroupByTitle.keySet().forEach(key -> productsGroupByTitle.get(key).stream().map(product -> DtoMapper.toProducDto(product, this)).map(ProductDto::toString).forEachOrdered(builder::append));
+         */
+        for (String category : productsGroupByTitle.keySet()) {
+            for (Product product : productsGroupByTitle.get(category)) {
+                ProductDto productDto = DtoMapper.toProducDto(product, this);
+                builder.append(productDto.toString());
+            }
+        }
+
+        builder.append("Results:\n");
+        builder.append("---------------------------------------------------------------------------------------\n");
+        builder.append(String.format("Total Amount: %.3f%n", getTotalPriceOfProducts()));
+        builder.append(String.format("Total Amount After Discounts: %.3f%n", getTotalAmountAfterDiscounts()));
+        builder.append(String.format("Your Delivery Cost: %.3f%n", getDeliveryCost()));
+        builder.append(String.format("Your Total Payment: %.3f%n", getTotalAmountAfterDiscounts() - getDeliveryCost()));
+        //builder.append("Total Discount: " + (getTotalPriceOfProducts() - getTotalAmountAfterDiscounts()) + "\n");
+
+        return builder.toString();
+    }
+
 
 }

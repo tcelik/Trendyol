@@ -9,7 +9,8 @@
 		<module>shoppingcart-trendyol-core</module>
         <module>shoppingcart-trendyol-main</module>
         <module>shoppingcart-trendyol-repository</module>
-    </modules>
+		<module>shoppingcart-trendyol-common</module>
+	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>

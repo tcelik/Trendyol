@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class ShoppingCartRepository {
@@ -54,17 +54,19 @@ public class ShoppingCartRepository {
         Double tempDiscountPrice = 0.0;
 
         for (Campaign campaign : campaigns) {
-
-            switch (campaign.getDiscountType()) {
-                case RATE:
-                    tempDiscountPrice = processDiscountTypeRateCampaign(campaign);
-                    if (tempDiscountPrice > resultDiscountPrice) resultDiscountPrice = tempDiscountPrice;
-                    break;
-                case AMOUNT:
-                    tempDiscountPrice = processDiscountTypeAmountCampaign(campaign);
-                    resultDiscountPrice += tempDiscountPrice;
-                    break;
-                default: log.info("Not valid campaign, valid for campaign RATE | AMOUNT");
+            HashMap<Product, Integer> productsByCategory = getProductsByCategory(campaign.getCategory());
+            if ((Integer) productsByCategory.values().stream().mapToInt(Integer::intValue).sum() >= campaign.getMinimumAmount()) {
+                switch (campaign.getDiscountType()) {
+                    case RATE:
+                        tempDiscountPrice = processDiscountTypeRateCampaign(campaign);
+                        if (tempDiscountPrice > resultDiscountPrice) resultDiscountPrice = tempDiscountPrice;
+                        break;
+                    case AMOUNT:
+                        tempDiscountPrice = processDiscountTypeAmountCampaign(campaign);
+                        resultDiscountPrice += tempDiscountPrice;
+                        break;
+                    default: log.info("Not valid campaign, valid for campaign RATE | AMOUNT");
+                }
             }
         }
 

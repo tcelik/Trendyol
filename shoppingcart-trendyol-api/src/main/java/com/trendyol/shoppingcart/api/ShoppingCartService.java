@@ -81,4 +81,8 @@ public interface ShoppingCartService {
 
     Integer getNumberOfDeliveries();
 
+    /**
+     * Information about shopping cart ( Products with total price )
+     */
+    String print();
 }
